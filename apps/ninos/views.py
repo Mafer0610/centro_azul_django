@@ -1,9 +1,8 @@
 """
-apps/ninos/views.py — Vistas (T en MTV) para niños.
+apps/ninos/views.py – Vistas para niños.
 """
 from datetime import date
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
 
@@ -11,17 +10,23 @@ from .models import Nino, Tutor
 from .forms import RegistroNinoForm
 
 
-@login_required
+def sesion_requerida(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('usuario_id'):
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    wrapper.__name__ = view_func.__name__
+    return wrapper
+
+
+@sesion_requerida
 def lista_ninos_view(request):
-    """Equivalente a vista/lista_ninos_view.py render()"""
     ninos = (
         Nino.objects
         .filter(activo=1)
         .select_related('tutor')
         .order_by('nombre_completo')
     )
-
-    # Estadísticas
     total  = ninos.count()
     neurot = ninos.filter(diagnostico='Neurotípico').count()
     neurod = total - neurot
@@ -35,16 +40,14 @@ def lista_ninos_view(request):
         'masculino': masc,
         'femenino': fem,
     }
-
     return render(request, 'ninos/lista.html', {
         'ninos': ninos,
         'stats': stats,
     })
 
 
-@login_required
+@sesion_requerida
 def registro_nino_view(request):
-    """Equivalente a vista/registro_nino_view.py render()"""
     form = RegistroNinoForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():

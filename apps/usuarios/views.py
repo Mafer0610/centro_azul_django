@@ -14,7 +14,7 @@ from .forms import LoginForm, RegistroUsuarioForm
 @require_http_methods(['GET', 'POST'])
 def login_view(request):
     if request.session.get('usuario_id'):
-        return redirect('menu_principal')
+        return redirect('menu')
 
     error = ''
     if request.method == 'POST':
@@ -38,7 +38,7 @@ def login_view(request):
                     if bcrypt.checkpw(password_input.encode(), uhash.encode()):
                         request.session['usuario_id'] = uid
                         request.session['usuario'] = uname
-                        return redirect('menu_principal')
+                        return redirect('menu')
                     else:
                         error = 'Contraseña incorrecta. Por favor, intente nuevamente.'
             except Exception as e:

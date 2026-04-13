@@ -1,22 +1,26 @@
 """
-apps/reportes/views.py — Generación de PDF con fpdf2.
-Equivalente a controlador/reporte_controller.py del original Streamlit.
+apps/reportes/views.py – Generación de PDF con fpdf2.
 """
 from datetime import date
 from io import BytesIO
 
-from django.http import HttpResponse, Http404
-from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import redirect
 
 from apps.citas.models import Cita
 from apps.ninos.models import Nino
 
 
+def sesion_requerida(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('usuario_id'):
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    wrapper.__name__ = view_func.__name__
+    return wrapper
+
+
 def _build_pdf_citas(citas, titulo='Reporte de Citas'):
-    """
-    Genera un PDF con fpdf2 — misma lógica que el controlador original.
-    Retorna bytes del PDF.
-    """
     try:
         from fpdf import FPDF
     except ImportError:
@@ -26,26 +30,23 @@ def _build_pdf_citas(citas, titulo='Reporte de Citas'):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # ── Encabezado ────────────────────────────────────────────────────────────
-    pdf.set_fill_color(13, 27, 62)          # Navy #0D1B3E
+    pdf.set_fill_color(13, 27, 62)
     pdf.rect(0, 0, 210, 35, 'F')
     pdf.set_text_color(255, 255, 255)
     pdf.set_font('Helvetica', 'B', 18)
     pdf.set_xy(10, 8)
-    pdf.cell(0, 10, 'Centro Azul — Acuática Inicial', ln=True)
+    pdf.cell(0, 10, 'Centro Azul - Acuatica Inicial', ln=True)
     pdf.set_font('Helvetica', '', 11)
     pdf.set_xy(10, 20)
     pdf.cell(0, 8, titulo, ln=True)
 
-    # Fecha del reporte
     pdf.set_text_color(50, 50, 50)
     pdf.set_font('Helvetica', '', 9)
     pdf.set_xy(10, 40)
     pdf.cell(0, 6, f'Generado el: {date.today().strftime("%d/%m/%Y")}', ln=True)
     pdf.ln(4)
 
-    # ── Tabla ─────────────────────────────────────────────────────────────────
-    headers = ['Niño', 'Fecha', 'Hora', 'Tipo', 'Terapeuta', 'Estado']
+    headers = ['Nino', 'Fecha', 'Hora', 'Tipo', 'Terapeuta', 'Estado']
     widths  = [50, 25, 20, 30, 40, 25]
 
     pdf.set_fill_color(13, 27, 62)
@@ -73,7 +74,6 @@ def _build_pdf_citas(citas, titulo='Reporte de Citas'):
         pdf.ln()
         fill = not fill
 
-    # ── Total ─────────────────────────────────────────────────────────────────
     pdf.ln(4)
     pdf.set_font('Helvetica', 'B', 10)
     pdf.set_text_color(13, 27, 62)
@@ -84,9 +84,8 @@ def _build_pdf_citas(citas, titulo='Reporte de Citas'):
     return buf.getvalue()
 
 
-@login_required
+@sesion_requerida
 def reporte_citas_view(request):
-    """Genera y descarga el PDF de citas — mismo comportamiento que Streamlit."""
     estado = request.GET.get('estado', '')
     fecha  = request.GET.get('fecha', '')
 
@@ -97,10 +96,9 @@ def reporte_citas_view(request):
         citas = citas.filter(fecha=fecha)
 
     citas = list(citas)
-
     titulo = 'Reporte de Citas'
     if estado:
-        titulo += f' — {estado.replace("_"," ").capitalize()}'
+        titulo += f' - {estado.replace("_", " ").capitalize()}'
 
     try:
         pdf_bytes = _build_pdf_citas(citas, titulo)
@@ -113,9 +111,8 @@ def reporte_citas_view(request):
     return response
 
 
-@login_required
+@sesion_requerida
 def reporte_ninos_view(request):
-    """Genera y descarga un PDF con el listado de niños."""
     try:
         from fpdf import FPDF
     except ImportError:
@@ -132,10 +129,10 @@ def reporte_ninos_view(request):
     pdf.set_text_color(255, 255, 255)
     pdf.set_font('Helvetica', 'B', 18)
     pdf.set_xy(10, 8)
-    pdf.cell(0, 10, 'Centro Azul — Acuática Inicial', ln=True)
+    pdf.cell(0, 10, 'Centro Azul - Acuatica Inicial', ln=True)
     pdf.set_font('Helvetica', '', 11)
     pdf.set_xy(10, 20)
-    pdf.cell(0, 8, 'Listado de Niños Inscritos', ln=True)
+    pdf.cell(0, 8, 'Listado de Ninos Inscritos', ln=True)
 
     pdf.set_text_color(50, 50, 50)
     pdf.set_font('Helvetica', '', 9)
@@ -143,7 +140,7 @@ def reporte_ninos_view(request):
     pdf.cell(0, 6, f'Generado el: {date.today().strftime("%d/%m/%Y")}', ln=True)
     pdf.ln(4)
 
-    headers = ['Nombre', 'Edad', 'Género', 'Diagnóstico', 'Tutor', 'Teléfono']
+    headers = ['Nombre', 'Edad', 'Genero', 'Diagnostico', 'Tutor', 'Telefono']
     widths  = [55, 15, 25, 30, 45, 30]
 
     pdf.set_fill_color(13, 27, 62)
@@ -160,7 +157,7 @@ def reporte_ninos_view(request):
         pdf.set_fill_color(235, 242, 255) if fill else pdf.set_fill_color(255, 255, 255)
         row = [
             nino.nombre_completo[:25],
-            str(nino.edad or '—'),
+            str(nino.edad or '-'),
             nino.genero,
             nino.diagnostico,
             nino.tutor.nombre_completo[:22],
@@ -174,7 +171,7 @@ def reporte_ninos_view(request):
     pdf.ln(4)
     pdf.set_font('Helvetica', 'B', 10)
     pdf.set_text_color(13, 27, 62)
-    pdf.cell(0, 8, f'Total de niños activos: {ninos.count()}', ln=True)
+    pdf.cell(0, 8, f'Total de ninos activos: {ninos.count()}', ln=True)
 
     buf = BytesIO()
     pdf.output(buf)

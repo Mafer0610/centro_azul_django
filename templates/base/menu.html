@@ -1,0 +1,66 @@
+{% extends "base/base.html" %}
+{% block title %}Inicio{% endblock %}
+{% block page_title %}Panel Principal{% endblock %}
+
+{% block content %}
+
+<div class="az-stats">
+  <div class="az-stat">
+    <div class="az-stat-value">{{ total_ninos }}</div>
+    <div class="az-stat-label">Niños Activos</div>
+  </div>
+  <div class="az-stat">
+    <div class="az-stat-value">{{ citas_hoy }}</div>
+    <div class="az-stat-label">Citas Hoy</div>
+  </div>
+  <div class="az-stat">
+    <div class="az-stat-value">{{ total_prog }}</div>
+    <div class="az-stat-label">Citas Programadas</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
+
+  <a href="{% url 'lista_ninos' %}" style="text-decoration:none;">
+    <div class="az-card" style="cursor:pointer; transition:transform .2s; text-align:center;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2rem; margin-bottom:10px;">👶</div>
+      <div class="az-card-title" style="margin-bottom:6px;">Ver Niños</div>
+      <p style="font-size:.82rem; color:var(--text-muted);">Consulta el listado de alumnos inscritos</p>
+    </div>
+  </a>
+
+  <a href="{% url 'registro_nino' %}" style="text-decoration:none;">
+    <div class="az-card" style="cursor:pointer; transition:transform .2s; text-align:center;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2rem; margin-bottom:10px;">➕</div>
+      <div class="az-card-title" style="margin-bottom:6px;">Registrar Niño</div>
+      <p style="font-size:.82rem; color:var(--text-muted);">Inscribe a un nuevo alumno con su tutor</p>
+    </div>
+  </a>
+
+  <a href="{% url 'agenda' %}" style="text-decoration:none;">
+    <div class="az-card" style="cursor:pointer; transition:transform .2s; text-align:center;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2rem; margin-bottom:10px;">📅</div>
+      <div class="az-card-title" style="margin-bottom:6px;">Ver Agenda</div>
+      <p style="font-size:.82rem; color:var(--text-muted);">Revisa y gestiona las citas programadas</p>
+    </div>
+  </a>
+
+  <a href="{% url 'agendar_cita' %}" style="text-decoration:none;">
+    <div class="az-card" style="cursor:pointer; transition:transform .2s; text-align:center;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2rem; margin-bottom:10px;">🗓</div>
+      <div class="az-card-title" style="margin-bottom:6px;">Agendar Cita</div>
+      <p style="font-size:.82rem; color:var(--text-muted);">Programa una nueva sesión terapéutica</p>
+    </div>
+  </a>
+
+  <a href="{% url 'reporte_citas' %}" style="text-decoration:none;">
+    <div class="az-card" style="cursor:pointer; transition:transform .2s; text-align:center;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2rem; margin-bottom:10px;">📄</div>
+      <div class="az-card-title" style="margin-bottom:6px;">Reporte PDF</div>
+      <p style="font-size:.82rem; color:var(--text-muted);">Genera y descarga reportes en PDF</p>
+    </div>
+  </a>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Centro Azul{% endblock %} | Acuática Inicial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/azul.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="az-wrapper">
+  <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
+  <aside class="az-sidebar">
+
+    <div class="az-sidebar-logo">
+      {# Logo: coloca logo.png en static/img/ — se enlaza aquí automáticamente #}
+      <img src="{% static 'img/logo.png' %}" alt="Centro Azul logo"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <span style="display:none; width:46px; height:46px; background:linear-gradient(135deg,#4A9EFF,#00D4FF);
+                   border-radius:50%; align-items:center; justify-content:center;
+                   font-size:1.4rem;">🌊</span>
+      <div class="az-brand">
+        <span class="az-brand-name">Centro Azul</span>
+        <span class="az-brand-sub">Acuática Inicial</span>
+      </div>
+    </div>
+
+    <nav class="az-nav">
+      <span class="az-nav-label">Principal</span>
+      <a href="{% url 'menu' %}" class="az-nav-link {% if request.resolver_match.url_name == 'menu' %}active{% endif %}">
+        <span class="icon">🏠</span> Inicio
+      </a>
+
+      <span class="az-nav-label">Alumnos</span>
+      <a href="{% url 'lista_ninos' %}" class="az-nav-link {% if 'ninos' in request.path %}active{% endif %}">
+        <span class="icon">👶</span> Niños
+      </a>
+      <a href="{% url 'registro_nino' %}" class="az-nav-link {% if request.resolver_match.url_name == 'registro_nino' %}active{% endif %}">
+        <span class="icon">➕</span> Registrar Niño
+      </a>
+
+      <span class="az-nav-label">Agenda</span>
+      <a href="{% url 'agenda' %}" class="az-nav-link {% if 'citas' in request.path and 'agendar' not in request.path %}active{% endif %}">
+        <span class="icon">📅</span> Ver Citas
+      </a>
+      <a href="{% url 'agendar_cita' %}" class="az-nav-link {% if request.resolver_match.url_name == 'agendar_cita' %}active{% endif %}">
+        <span class="icon">🗓</span> Agendar Cita
+      </a>
+
+      <span class="az-nav-label">Reportes</span>
+      <a href="{% url 'reporte_citas' %}" class="az-nav-link">
+        <span class="icon">📄</span> Reporte Citas
+      </a>
+      <a href="{% url 'reporte_ninos' %}" class="az-nav-link">
+        <span class="icon">📋</span> Reporte Niños
+      </a>
+    </nav>
+
+    <div class="az-sidebar-footer">
+      {% if user.is_authenticated %}
+      <div class="az-user-chip">
+        <div class="az-user-avatar">{{ user.usuario|first|upper }}</div>
+        <div>
+          <div class="az-user-name">{{ user.usuario }}</div>
+          <div class="az-user-role">Administrador</div>
+        </div>
+      </div>
+      <a href="{% url 'logout' %}" class="az-btn az-btn-secondary" style="width:100%; justify-content:center;">
+        🚪 Cerrar Sesión
+      </a>
+      {% endif %}
+    </div>
+
+  </aside>
+
+  <!-- ── Main ──────────────────────────────────────────────────────────── -->
+  <main class="az-main">
+    <div class="az-topbar">
+      <h1 class="az-page-title">{% block page_title %}{% endblock %}</h1>
+      <div style="font-size:0.8rem; color:var(--text-muted);">
+        {% now "d M Y" %}
+      </div>
+    </div>
+
+    <div class="az-content">
+      {# ── Mensajes del sistema ────────────────────────────────────────── #}
+      {% for msg in messages %}
+        <div class="az-alert {% if msg.tags == 'error' %}az-alert-error{% elif msg.tags == 'success' %}az-alert-success{% else %}az-alert-info{% endif %}">
+          {{ msg }}
+        </div>
+      {% endfor %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

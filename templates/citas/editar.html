@@ -1,0 +1,50 @@
+{% extends "base/base.html" %}
+{% block title %}Editar Cita{% endblock %}
+{% block page_title %}Editar Estado de Cita{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 520px;">
+
+  <div class="az-card" style="margin-bottom:20px; background:rgba(74,158,255,0.06);">
+    <p class="az-section-title">📋 Información de la Cita</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:.88rem;">
+      <div><span style="color:var(--text-muted);">Niño:</span><br><strong>{{ cita.nino.nombre_completo }}</strong></div>
+      <div><span style="color:var(--text-muted);">Terapeuta:</span><br><strong>{{ cita.terapeuta }}</strong></div>
+      <div><span style="color:var(--text-muted);">Fecha:</span><br><strong>{{ cita.fecha|date:"d/m/Y" }}</strong></div>
+      <div><span style="color:var(--text-muted);">Hora:</span><br><strong>{{ cita.hora|time:"H:i" }}</strong></div>
+      <div><span style="color:var(--text-muted);">Tipo:</span><br><strong>{{ cita.tipo_sesion|capfirst }}</strong></div>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="az-card">
+      <p class="az-section-title">✏️ Actualizar Estado</p>
+
+      <div class="az-form-group">
+        <label>Estado de la cita</label>
+        <select name="estado">
+          <option value="programada"  {% if form.estado.value == "programada"  %}selected{% endif %}>🕐 Programada</option>
+          <option value="completada"  {% if form.estado.value == "completada"  %}selected{% endif %}>✅ Completada</option>
+          <option value="cancelada"   {% if form.estado.value == "cancelada"   %}selected{% endif %}>❌ Cancelada</option>
+          <option value="no_asistio"  {% if form.estado.value == "no_asistio"  %}selected{% endif %}>⚠️ No asistió</option>
+        </select>
+      </div>
+
+      <div class="az-form-group">
+        <label>Observaciones</label>
+        <textarea name="observaciones" rows="3"
+                  placeholder="Notas sobre la sesión...">{{ form.observaciones.value|default:'' }}</textarea>
+      </div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button type="submit" class="az-btn az-btn-primary">💾 Actualizar</button>
+        <a href="{% url 'agenda' %}" class="az-btn az-btn-secondary">✕ Cancelar</a>
+      </div>
+    </div>
+  </form>
+
+</div>
+
+{% endblock %}

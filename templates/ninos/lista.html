@@ -1,0 +1,96 @@
+{% extends "base/base.html" %}
+{% block title %}Niños{% endblock %}
+{% block page_title %}Niños Inscritos{% endblock %}
+
+{% block content %}
+
+<div class="az-stats">
+  <div class="az-stat">
+    <div class="az-stat-value">{{ stats.total }}</div>
+    <div class="az-stat-label">Total Activos</div>
+  </div>
+  <div class="az-stat">
+    <div class="az-stat-value">{{ stats.neurotipicos }}</div>
+    <div class="az-stat-label">Neurotípicos</div>
+  </div>
+  <div class="az-stat">
+    <div class="az-stat-value">{{ stats.neurodivergentes }}</div>
+    <div class="az-stat-label">Neurodivergentes</div>
+  </div>
+  <div class="az-stat">
+    <div class="az-stat-value">{{ stats.masculino }}</div>
+    <div class="az-stat-label">Masculino</div>
+  </div>
+  <div class="az-stat">
+    <div class="az-stat-value">{{ stats.femenino }}</div>
+    <div class="az-stat-label">Femenino</div>
+  </div>
+</div>
+
+<div class="az-action-bar">
+  <div style="font-size:.82rem; color:var(--text-muted);">
+    Mostrando {{ ninos|length }} niño{{ ninos|length|pluralize }}
+  </div>
+  <a href="{% url 'registro_nino' %}" class="az-btn az-btn-primary">
+    ➕ Registrar Niño
+  </a>
+</div>
+
+<div class="az-card" style="padding:0; overflow:hidden;">
+  {% if ninos %}
+    <div class="az-table-wrap">
+      <table class="az-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Género</th>
+            <th>Diagnóstico</th>
+            <th>Tutor</th>
+            <th>Teléfono</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for nino in ninos %}
+          <tr>
+            <td style="color:var(--text-muted);">{{ forloop.counter }}</td>
+            <td><strong>{{ nino.nombre_completo }}</strong></td>
+            <td>{{ nino.edad|default:"—" }}</td>
+            <td>
+              {% if nino.genero == "Masculino" %}
+                <span class="az-badge az-badge-blue">♂ {{ nino.genero }}</span>
+              {% else %}
+                <span class="az-badge az-badge-green">♀ {{ nino.genero }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if nino.diagnostico == "Neurotípico" %}
+                <span class="az-badge az-badge-blue">🔵 {{ nino.diagnostico }}</span>
+              {% else %}
+                <span class="az-badge az-badge-yellow">🟣 {{ nino.diagnostico }}</span>
+              {% endif %}
+            </td>
+            <td>{{ nino.tutor.nombre_completo }}</td>
+            <td>{{ nino.tutor.telefono }}</td>
+            <td style="color:var(--text-muted); font-size:.82rem;">
+              {{ nino.observaciones|default:"—"|truncatechars:40 }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="az-empty">
+      <div class="az-empty-icon">👶</div>
+      <p>No hay niños registrados aún.</p>
+      <a href="{% url 'registro_nino' %}" class="az-btn az-btn-primary" style="margin-top:16px;">
+        Registrar primer niño
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

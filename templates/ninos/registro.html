@@ -1,0 +1,149 @@
+{% extends "base/base.html" %}
+{% block title %}Registrar Niño{% endblock %}
+{% block page_title %}Registrar Nuevo Niño{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 820px;">
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="az-alert az-alert-error">{{ form.non_field_errors|join:", " }}</div>
+    {% endif %}
+
+    <!-- ── Datos del niño ─────────────────────────────────────────── -->
+    <div class="az-card" style="margin-bottom:20px;">
+      <p class="az-section-title">👶 Datos del Niño</p>
+
+      <div class="az-form-grid-2">
+        <div class="az-form-group">
+          <label>Nombre completo *</label>
+          <input type="text" name="nombre_nino"
+                 value="{{ form.nombre_nino.value|default:'' }}"
+                 placeholder="Nombre y apellidos">
+          {% if form.nombre_nino.errors %}
+            <p class="az-field-error">{{ form.nombre_nino.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <div class="az-form-group">
+          <label>Fecha de nacimiento *</label>
+          <input type="date" name="fecha_nacimiento"
+                 value="{{ form.fecha_nacimiento.value|default:'' }}">
+          {% if form.fecha_nacimiento.errors %}
+            <p class="az-field-error">{{ form.fecha_nacimiento.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="az-form-grid-2">
+        <div class="az-form-group">
+          <label>Género *</label>
+          <select name="genero">
+            <option value="">— Selecciona —</option>
+            <option value="Masculino" {% if form.genero.value == "Masculino" %}selected{% endif %}>Masculino</option>
+            <option value="Femenino"  {% if form.genero.value == "Femenino"  %}selected{% endif %}>Femenino</option>
+          </select>
+          {% if form.genero.errors %}
+            <p class="az-field-error">{{ form.genero.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <div class="az-form-group">
+          <label>Diagnóstico *</label>
+          <div class="az-radio-group" style="margin-top:10px;">
+            <label>
+              <input type="radio" name="diagnostico" value="Neurotípico"
+                     {% if form.diagnostico.value == "Neurotípico" %}checked{% endif %}>
+              🔵 Neurotípico
+            </label>
+            <label>
+              <input type="radio" name="diagnostico" value="Neurodivergente"
+                     {% if form.diagnostico.value == "Neurodivergente" %}checked{% endif %}>
+              🟣 Neurodivergente
+            </label>
+          </div>
+          {% if form.diagnostico.errors %}
+            <p class="az-field-error">{{ form.diagnostico.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="az-form-group">
+        <label>Observaciones</label>
+        <textarea name="observaciones" rows="3"
+                  placeholder="Alergias, condiciones médicas, notas especiales...">{{ form.observaciones.value|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <!-- ── Datos del tutor ────────────────────────────────────────── -->
+    <div class="az-card" style="margin-bottom:20px;">
+      <p class="az-section-title">👨‍👩‍👦 Datos del Tutor</p>
+
+      <div class="az-form-grid-2">
+        <div class="az-form-group">
+          <label>Nombre completo *</label>
+          <input type="text" name="nombre_tutor"
+                 value="{{ form.nombre_tutor.value|default:'' }}"
+                 placeholder="Nombre del tutor o cuidador">
+          {% if form.nombre_tutor.errors %}
+            <p class="az-field-error">{{ form.nombre_tutor.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <div class="az-form-group">
+          <label>Teléfono *</label>
+          <input type="text" name="telefono"
+                 value="{{ form.telefono.value|default:'' }}"
+                 placeholder="Ej. 961 123 4567">
+          {% if form.telefono.errors %}
+            <p class="az-field-error">{{ form.telefono.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="az-form-grid-2">
+        <div class="az-form-group">
+          <label>Parentesco *</label>
+          <select name="parentesco">
+            <option value="">— Selecciona —</option>
+            {% for val, lbl in form.fields.parentesco.choices %}
+              {% if val %}
+                <option value="{{ val }}" {% if form.parentesco.value == val %}selected{% endif %}>{{ lbl }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          {% if form.parentesco.errors %}
+            <p class="az-field-error">{{ form.parentesco.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <div class="az-form-group">
+          <label>Correo electrónico (opcional)</label>
+          <input type="email" name="email"
+                 value="{{ form.email.value|default:'' }}"
+                 placeholder="correo@ejemplo.com">
+        </div>
+      </div>
+
+      <div class="az-form-group">
+        <label>Dirección (opcional)</label>
+        <textarea name="direccion" rows="2"
+                  placeholder="Calle, colonia, ciudad...">{{ form.direccion.value|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <button type="submit" class="az-btn az-btn-primary">
+        💾 Guardar Registro
+      </button>
+      <a href="{% url 'lista_ninos' %}" class="az-btn az-btn-secondary">
+        ✕ Cancelar
+      </a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

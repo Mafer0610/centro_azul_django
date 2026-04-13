@@ -1,0 +1,75 @@
+{% extends "base/base.html" %}
+{% block title %}Agenda{% endblock %}
+{% block page_title %}Agenda de Citas{% endblock %}
+
+{% block content %}
+
+<div class="az-action-bar">
+  <form method="get" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <div class="az-form-group" style="margin-bottom:0;">
+      <input type="date" name="fecha" value="{{ fecha_filtro|default:'' }}"
+             style="min-width:160px;">
+    </div>
+    <button type="submit" class="az-btn az-btn-secondary">🔍 Filtrar</button>
+    {% if fecha_filtro %}
+      <a href="{% url 'agenda' %}" class="az-btn az-btn-secondary">✕ Quitar filtro</a>
+    {% endif %}
+  </form>
+  <a href="{% url 'agendar_cita' %}" class="az-btn az-btn-primary">🗓 Agendar Cita</a>
+</div>
+
+<div class="az-card" style="padding:0; overflow:hidden;">
+  {% if citas %}
+    <div class="az-table-wrap">
+      <table class="az-table">
+        <thead>
+          <tr>
+            <th>Niño</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Tipo</th>
+            <th>Terapeuta</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cita in citas %}
+          <tr>
+            <td><strong>{{ cita.nino.nombre_completo }}</strong></td>
+            <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+            <td>{{ cita.hora|time:"H:i" }}</td>
+            <td>{{ cita.tipo_sesion|capfirst }}</td>
+            <td>{{ cita.terapeuta }}</td>
+            <td>
+              {% if cita.estado == "programada" %}
+                <span class="az-badge az-badge-blue">🕐 Programada</span>
+              {% elif cita.estado == "completada" %}
+                <span class="az-badge az-badge-green">✅ Completada</span>
+              {% elif cita.estado == "cancelada" %}
+                <span class="az-badge az-badge-red">❌ Cancelada</span>
+              {% else %}
+                <span class="az-badge az-badge-yellow">⚠️ No asistió</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'editar_cita' cita.pk %}" class="az-btn az-btn-secondary"
+                 style="padding:5px 12px; font-size:.78rem;">✏️ Editar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="az-empty">
+      <div class="az-empty-icon">📅</div>
+      <p>No hay citas {% if fecha_filtro %}para esta fecha{% else %}programadas{% endif %}.</p>
+      <a href="{% url 'agendar_cita' %}" class="az-btn az-btn-primary" style="margin-top:16px;">
+        Agendar primera cita
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

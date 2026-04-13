@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión | Centro Azul</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/azul.css' %}">
+</head>
+<body>
+
+<div class="az-auth-page">
+  <div class="az-auth-box">
+
+    <div class="az-auth-logo">
+      {# Logo enlazado desde static/img/logo.png — tú agregarás el archivo #}
+      <img src="{% static 'img/logo.png' %}" alt="Centro Azul"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+
+      <h1>Centro Azul</h1>
+      <p>Acuática Inicial</p>
+    </div>
+
+    {% for msg in messages %}
+      <div class="az-alert {% if msg.tags == 'error' %}az-alert-error{% else %}az-alert-success{% endif %}">
+        {{ msg }}
+      </div>
+    {% endfor %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="az-form-group">
+        <label for="id_usuario">Usuario</label>
+        <input type="text" name="usuario" id="id_usuario"
+               value="{{ form.usuario.value|default:'' }}"
+               placeholder="Tu nombre de usuario" autocomplete="username">
+        {% if form.usuario.errors %}
+          <p class="az-field-error">{{ form.usuario.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <div class="az-form-group">
+        <label for="id_password">Contraseña</label>
+        <input type="password" name="password" id="id_password"
+               placeholder="••••••••" autocomplete="current-password">
+        {% if form.password.errors %}
+          <p class="az-field-error">{{ form.password.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="az-btn az-btn-primary" style="width:100%; justify-content:center; padding:12px;">
+        🔐 Iniciar Sesión
+      </button>
+    </form>
+
+    <div class="az-auth-footer">
+      ¿No tienes cuenta?
+      <a href="{% url 'registro' %}">Regístrate aquí</a>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

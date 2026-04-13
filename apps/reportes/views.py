@@ -46,7 +46,7 @@ def _build_pdf_citas(citas, titulo='Reporte de Citas'):
     pdf.cell(0, 6, f'Generado el: {date.today().strftime("%d/%m/%Y")}', ln=True)
     pdf.ln(4)
 
-    headers = ['Nino', 'Fecha', 'Hora', 'Tipo', 'Terapeuta', 'Estado']
+    headers = ['Nino', 'Fecha', 'Hora', 'Tipo', 'Responsable', 'Status']
     widths  = [50, 25, 20, 30, 40, 25]
 
     pdf.set_fill_color(13, 27, 62)
@@ -64,10 +64,10 @@ def _build_pdf_citas(citas, titulo='Reporte de Citas'):
         row = [
             cita.nino.nombre_completo[:22],
             cita.fecha.strftime('%d/%m/%Y'),
-            cita.hora.strftime('%H:%M'),
-            cita.tipo_sesion.capitalize(),
-            cita.terapeuta[:20],
-            cita.estado.replace('_', ' ').capitalize(),
+            cita.hora_inicio.strftime('%H:%M'),
+            cita.tipo[:20],
+            (cita.responsable or '-')[:20],
+            cita.status.capitalize(),
         ]
         for val, w in zip(row, widths):
             pdf.cell(w, 7, str(val), border=1, fill=True)
@@ -86,19 +86,19 @@ def _build_pdf_citas(citas, titulo='Reporte de Citas'):
 
 @sesion_requerida
 def reporte_citas_view(request):
-    estado = request.GET.get('estado', '')
+    status = request.GET.get('status', '')
     fecha  = request.GET.get('fecha', '')
 
-    citas = Cita.objects.select_related('nino').order_by('fecha', 'hora')
-    if estado:
-        citas = citas.filter(estado=estado)
+    citas = Cita.objects.select_related('nino').order_by('fecha', 'hora_inicio')
+    if status:
+        citas = citas.filter(status=status)
     if fecha:
         citas = citas.filter(fecha=fecha)
 
     citas = list(citas)
     titulo = 'Reporte de Citas'
-    if estado:
-        titulo += f' - {estado.replace("_", " ").capitalize()}'
+    if status:
+        titulo += f' - {status.capitalize()}'
 
     try:
         pdf_bytes = _build_pdf_citas(citas, titulo)

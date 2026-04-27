@@ -3,48 +3,37 @@
 {% block page_title %}Agendar Nueva Cita{% endblock %}
 
 {% block content %}
-
 <div style="max-width: 640px;">
   <form method="post">
     {% csrf_token %}
-
     {% if form.non_field_errors %}
       <div class="az-alert az-alert-error">{{ form.non_field_errors|join:", " }}</div>
     {% endif %}
 
     <div class="az-card">
-      <p class="az-section-title">🗓 Datos de la Cita</p>
+      <p class="az-section-title">Datos de la Cita</p>
 
       <div class="az-form-group">
         <label>Niño *</label>
         <select name="nino">
           <option value="">— Selecciona un niño —</option>
           {% for nino in form.fields.nino.queryset %}
-            <option value="{{ nino.pk }}" {% if form.nino.value|stringformat:"s" == nino.pk|stringformat:"s" %}selected{% endif %}>
-              {{ nino.nombre_completo }}
-            </option>
+            <option value="{{ nino.pk }}" {% if form.nino.value|stringformat:"s" == nino.pk|stringformat:"s" %}selected{% endif %}>{{ nino.nombre_completo }}</option>
           {% endfor %}
         </select>
-        {% if form.nino.errors %}
-          <p class="az-field-error">{{ form.nino.errors|join:", " }}</p>
-        {% endif %}
+        {% if form.nino.errors %}<p class="az-field-error">{{ form.nino.errors|join:", " }}</p>{% endif %}
       </div>
 
       <div class="az-form-grid-2">
         <div class="az-form-group">
           <label>Fecha *</label>
           <input type="date" name="fecha" value="{{ form.fecha.value|default:'' }}">
-          {% if form.fecha.errors %}
-            <p class="az-field-error">{{ form.fecha.errors|join:", " }}</p>
-          {% endif %}
+          {% if form.fecha.errors %}<p class="az-field-error">{{ form.fecha.errors|join:", " }}</p>{% endif %}
         </div>
-
         <div class="az-form-group">
           <label>Hora *</label>
           <input type="time" name="hora" value="{{ form.hora.value|default:'' }}">
-          {% if form.hora.errors %}
-            <p class="az-field-error">{{ form.hora.errors|join:", " }}</p>
-          {% endif %}
+          {% if form.hora.errors %}<p class="az-field-error">{{ form.hora.errors|join:", " }}</p>{% endif %}
         </div>
       </div>
 
@@ -53,42 +42,32 @@
           <label>Tipo de sesión *</label>
           <select name="tipo_sesion">
             <option value="">— Selecciona —</option>
-            <option value="evaluacion"  {% if form.tipo_sesion.value == "evaluacion"  %}selected{% endif %}>Evaluación</option>
-            <option value="terapia"     {% if form.tipo_sesion.value == "terapia"     %}selected{% endif %}>Terapia</option>
-            <option value="seguimiento" {% if form.tipo_sesion.value == "seguimiento" %}selected{% endif %}>Seguimiento</option>
-            <option value="otro"        {% if form.tipo_sesion.value == "otro"        %}selected{% endif %}>Otro</option>
+            <option value="CEMS"       {% if form.tipo_sesion.value == "CEMS"       %}selected{% endif %}>CEMS</option>
+            <option value="AI"         {% if form.tipo_sesion.value == "AI"         %}selected{% endif %}>AI</option>
+            <option value="OCUPACIONAL"{% if form.tipo_sesion.value == "OCUPACIONAL"%}selected{% endif %}>Ocupacional</option>
+            <option value="BABY SPA"   {% if form.tipo_sesion.value == "BABY SPA"   %}selected{% endif %}>Baby Spa</option>
+            <option value="MUESTRA"    {% if form.tipo_sesion.value == "MUESTRA"    %}selected{% endif %}>Muestra</option>
+            <option value="REPOSICION" {% if form.tipo_sesion.value == "REPOSICION" %}selected{% endif %}>Reposición</option>
           </select>
-          {% if form.tipo_sesion.errors %}
-            <p class="az-field-error">{{ form.tipo_sesion.errors|join:", " }}</p>
-          {% endif %}
+          {% if form.tipo_sesion.errors %}<p class="az-field-error">{{ form.tipo_sesion.errors|join:", " }}</p>{% endif %}
         </div>
-
         <div class="az-form-group">
-          <label>Terapeuta *</label>
-          <input type="text" name="terapeuta"
-                 value="{{ form.terapeuta.value|default:'' }}"
-                 placeholder="Nombre del terapeuta">
-          {% if form.terapeuta.errors %}
-            <p class="az-field-error">{{ form.terapeuta.errors|join:", " }}</p>
-          {% endif %}
+          <label>Responsable *</label>
+          <input type="text" name="terapeuta" value="{{ form.terapeuta.value|default:'' }}" placeholder="Nombre del responsable">
+          {% if form.terapeuta.errors %}<p class="az-field-error">{{ form.terapeuta.errors|join:", " }}</p>{% endif %}
         </div>
       </div>
 
       <div class="az-form-group">
-        <label>Observaciones</label>
-        <textarea name="observaciones" rows="3"
-                  placeholder="Notas adicionales...">{{ form.observaciones.value|default:'' }}</textarea>
+        <label>Notas</label>
+        <textarea name="observaciones" rows="3" placeholder="Notas adicionales...">{{ form.observaciones.value|default:'' }}</textarea>
       </div>
 
       <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
-        <button type="submit" class="az-btn az-btn-primary">
-          💾 Guardar Cita
-        </button>
-        <a href="{% url 'agenda' %}" class="az-btn az-btn-secondary">✕ Cancelar</a>
+        <button type="submit" class="az-btn az-btn-primary">Guardar Cita</button>
+        <a href="{% url 'agenda' %}" class="az-btn az-btn-secondary">Cancelar</a>
       </div>
     </div>
-
   </form>
 </div>
-
 {% endblock %}

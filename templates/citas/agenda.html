@@ -2,74 +2,261 @@
 {% block title %}Agenda{% endblock %}
 {% block page_title %}Agenda de Citas{% endblock %}
 
+{% block extra_css %}
+<style>
+  .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+  .cal-nav { display:flex; align-items:center; gap:10px; }
+  .cal-nav-btn {
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    color: var(--text-primary); padding: 7px 14px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.9rem; transition: all .15s;
+  }
+  .cal-nav-btn:hover { background: rgba(255,255,255,0.12); }
+  .cal-title-txt { font-family:'DM Serif Display',Georgia,serif; font-size:1.3rem; color:var(--text-primary); min-width:200px; text-align:center; }
+  .cal-tabs { display:flex; border:1px solid var(--glass-border); border-radius: var(--radius-sm); overflow:hidden; }
+  .cal-tab { padding:7px 20px; font-size:0.85rem; background:transparent; border:none; color:var(--text-muted); cursor:pointer; transition:all .15s; }
+  .cal-tab.active { background:var(--glass-bg); color:var(--text-primary); font-weight:600; }
+
+  /* ── Mes ── */
+  .month-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--glass-border); border:1px solid var(--glass-border); border-radius:var(--radius); overflow:hidden; }
+  .day-label { background:rgba(74,158,255,0.08); padding:8px 4px; text-align:center; font-size:0.72rem; color:var(--accent-cyan); font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+  .day-cell { background:rgba(13,27,62,0.6); min-height:90px; padding:7px; cursor:default; transition:background .12s; position:relative; }
+  .day-cell:hover { background:rgba(74,158,255,0.07); }
+  .day-cell.other-month { background:rgba(13,27,62,0.35); }
+  .day-cell.today .day-num-inner { background:var(--accent-blue); color:#fff; border-radius:50%; }
+  .day-num { width:26px; height:26px; display:flex; align-items:center; justify-content:center; margin-bottom:5px; }
+  .day-num-inner { width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:500; color:var(--text-primary); }
+  .day-cell.other-month .day-num-inner { color:var(--text-muted); }
+  .cita-pill { font-size:0.68rem; padding:2px 6px; border-radius:4px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; cursor:pointer; }
+  .pill-pendiente  { background:rgba(74,158,255,0.18); color:var(--accent-blue); }
+  .pill-confirmada { background:rgba(255,215,0,0.18);  color:var(--accent-gold); }
+  .pill-completada { background:rgba(46,204,113,0.18); color:#2ecc71; }
+  .pill-cancelada  { background:rgba(231,76,60,0.18);  color:#e74c3c; }
+  .more-tag { font-size:0.65rem; color:var(--text-muted); }
+
+  /* ── Año ── */
+  .year-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .mini-month { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:var(--radius-sm); padding:10px; cursor:pointer; transition:all .15s; }
+  .mini-month:hover { border-color:var(--accent-blue); background:rgba(74,158,255,0.06); }
+  .mini-title { font-size:0.75rem; font-weight:600; color:var(--text-primary); text-align:center; margin-bottom:6px; }
+  .mini-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; }
+  .mini-cell { height:13px; font-size:8px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); border-radius:2px; }
+  .mini-cell.has-cita { background:var(--accent-blue); border-radius:2px; }
+  .mini-cell.today-mini { outline:1px solid var(--accent-cyan); border-radius:2px; }
+
+  /* ── Leyenda ── */
+  .legend { display:flex; gap:16px; flex-wrap:wrap; margin-top:16px; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted); }
+  .legend-dot { width:10px; height:10px; border-radius:3px; }
+
+  /* ── Modal detalle ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:var(--navy-mid); border:1px solid var(--glass-border); border-radius:var(--radius); padding:28px; width:100%; max-width:420px; box-shadow:var(--shadow); }
+  .modal-title { font-family:'DM Serif Display',Georgia,serif; font-size:1.1rem; margin-bottom:16px; color:var(--text-primary); }
+  .modal-cita-row { padding:10px 0; border-bottom:1px solid var(--glass-border); font-size:0.85rem; }
+  .modal-cita-row:last-child { border-bottom:none; }
+  .modal-close { float:right; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem; margin-top:-4px; }
+
+  @media(max-width:600px){ .year-grid{ grid-template-columns:repeat(2,1fr); } }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="az-action-bar">
-  <form method="get" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-    <div class="az-form-group" style="margin-bottom:0;">
-      <input type="date" name="fecha" value="{{ fecha_filtro|default:'' }}"
-             style="min-width:160px;">
+<div class="cal-header">
+  <div class="cal-nav">
+    <button class="cal-nav-btn" id="prev-btn">&larr;</button>
+    <span class="cal-title-txt" id="cal-title"></span>
+    <button class="cal-nav-btn" id="next-btn">&rarr;</button>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <button class="cal-nav-btn" id="today-btn">Hoy</button>
+    <div class="cal-tabs">
+      <button class="cal-tab active" id="tab-month" onclick="setView('month')">Mes</button>
+      <button class="cal-tab" id="tab-year" onclick="setView('year')">Año</button>
     </div>
-    <button type="submit" class="az-btn az-btn-secondary">🔍 Filtrar</button>
-    {% if fecha_filtro %}
-      <a href="{% url 'agenda' %}" class="az-btn az-btn-secondary">✕ Quitar filtro</a>
-    {% endif %}
-  </form>
-  <a href="{% url 'agendar_cita' %}" class="az-btn az-btn-primary">🗓 Agendar Cita</a>
+    <a href="{% url 'agendar_cita' %}" class="az-btn az-btn-primary" style="padding:7px 18px;">+ Agendar</a>
+  </div>
 </div>
 
-<div class="az-card" style="padding:0; overflow:hidden;">
-  {% if citas %}
-    <div class="az-table-wrap">
-      <table class="az-table">
-        <thead>
-          <tr>
-            <th>Niño</th>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Tipo</th>
-            <th>Terapeuta</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for cita in citas %}
-          <tr>
-            <td><strong>{{ cita.nino.nombre_completo }}</strong></td>
-            <td>{{ cita.fecha|date:"d/m/Y" }}</td>
-            <td>{{ cita.hora|time:"H:i" }}</td>
-            <td>{{ cita.tipo_sesion|capfirst }}</td>
-            <td>{{ cita.terapeuta }}</td>
-            <td>
-              {% if cita.estado == "programada" %}
-                <span class="az-badge az-badge-blue">🕐 Programada</span>
-              {% elif cita.estado == "completada" %}
-                <span class="az-badge az-badge-green">✅ Completada</span>
-              {% elif cita.estado == "cancelada" %}
-                <span class="az-badge az-badge-red">❌ Cancelada</span>
-              {% else %}
-                <span class="az-badge az-badge-yellow">⚠️ No asistió</span>
-              {% endif %}
-            </td>
-            <td>
-              <a href="{% url 'editar_cita' cita.pk %}" class="az-btn az-btn-secondary"
-                 style="padding:5px 12px; font-size:.78rem;">✏️ Editar</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <div class="az-empty">
-      <div class="az-empty-icon">📅</div>
-      <p>No hay citas {% if fecha_filtro %}para esta fecha{% else %}programadas{% endif %}.</p>
-      <a href="{% url 'agendar_cita' %}" class="az-btn az-btn-primary" style="margin-top:16px;">
-        Agendar primera cita
-      </a>
-    </div>
-  {% endif %}
+<div id="cal-body"></div>
+
+<div class="legend" id="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(74,158,255,0.5);"></div>Pendiente</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,215,0,0.5);"></div>Confirmada</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(46,204,113,0.5);"></div>Completada</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(231,76,60,0.5);"></div>Cancelada</div>
 </div>
 
+<!-- Modal detalle día -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">
+      Citas del día
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="modal-body"></div>
+    <div style="margin-top:16px;">
+      <a href="{% url 'agendar_cita' %}" class="az-btn az-btn-primary" style="font-size:.82rem; padding:8px 16px;">+ Agendar cita</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+// Citas inyectadas desde Django — formato [{date:'YYYY-MM-DD', nino:'...', tipo:'...', hora:'HH:MM', status:'...', pk:N}, ...]
+const CITAS = [
+  {% for cita in citas %}
+  {
+    date: "{{ cita.fecha|date:'Y-m-d' }}",
+    nino: "{{ cita.nino.nombre_completo|truncatechars:22 }}",
+    tipo: "{{ cita.tipo }}",
+    hora: "{{ cita.hora_inicio|time:'H:i' }}",
+    status: "{{ cita.status }}",
+    pk: {{ cita.pk }}
+  }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+];
+
+const TODAY = new Date();
+TODAY.setHours(0,0,0,0);
+
+let current = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+let viewMode = 'month';
+
+function citasForKey(key){ return CITAS.filter(c => c.date === key); }
+function daysWithCitas(y, m){
+  return new Set(CITAS.filter(c => {
+    const [cy,cm] = c.date.split('-').map(Number);
+    return cy===y && cm===m+1;
+  }).map(c => parseInt(c.date.split('-')[2])));
+}
+function pillClass(status){
+  return {pendiente:'pill-pendiente',confirmada:'pill-confirmada',completada:'pill-completada',cancelada:'pill-cancelada'}[status]||'pill-pendiente';
+}
+
+function openModal(dateStr){
+  const citas = citasForKey(dateStr);
+  const [y,m,d] = dateStr.split('-').map(Number);
+  document.getElementById('modal-title').innerHTML =
+    `${d} de ${MESES[m-1]} de ${y} <button class="modal-close" onclick="closeModal()">&times;</button>`;
+  let html = '';
+  if(!citas.length){
+    html = '<p style="color:var(--text-muted); font-size:.85rem;">Sin citas para este día.</p>';
+  } else {
+    citas.forEach(c => {
+      html += `<div class="modal-cita-row">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>${c.nino}</strong>
+          <span class="az-badge ${pillClass(c.status).replace('pill-','az-badge-').replace('pendiente','blue').replace('confirmada','yellow').replace('completada','green').replace('cancelada','red')}">${c.status}</span>
+        </div>
+        <div style="color:var(--text-muted); margin-top:4px;">${c.hora} &nbsp;·&nbsp; ${c.tipo}</div>
+        <div style="margin-top:6px;">
+          <a href="/citas/editar/${c.pk}/" class="az-btn az-btn-secondary" style="font-size:.75rem; padding:4px 10px;">Editar</a>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+window.closeModal = () => document.getElementById('modal').classList.remove('open');
+document.getElementById('modal').addEventListener('click', e => { if(e.target.id==='modal') closeModal(); });
+
+function renderMonth(y, m){
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const daysInPrev = new Date(y, m, 0).getDate();
+
+  let html = '<div class="month-grid">';
+  DIAS.forEach(d => html += `<div class="day-label">${d}</div>`);
+
+  for(let i=0; i<firstDay; i++){
+    const dn = daysInPrev - firstDay + 1 + i;
+    const dt = new Date(y, m-1, dn);
+    const key = dt.toISOString().slice(0,10);
+    html += `<div class="day-cell other-month" onclick="openModal('${key}')"><div class="day-num"><div class="day-num-inner">${dn}</div></div></div>`;
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    const dt = new Date(y, m, d);
+    const key = dt.toISOString().slice(0,10);
+    const isToday = dt.getTime() === TODAY.getTime();
+    const citas = citasForKey(key);
+    html += `<div class="day-cell${isToday?' today':''}" onclick="openModal('${key}')">`;
+    html += `<div class="day-num"><div class="day-num-inner">${d}</div></div>`;
+    citas.slice(0,2).forEach(c => {
+      html += `<div class="cita-pill ${pillClass(c.status)}">${c.hora} ${c.nino.split(' ')[0]}</div>`;
+    });
+    if(citas.length>2) html += `<div class="more-tag">+${citas.length-2} más</div>`;
+    html += '</div>';
+  }
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for(let i=1; i<=remaining; i++){
+    const dt = new Date(y, m+1, i);
+    const key = dt.toISOString().slice(0,10);
+    html += `<div class="day-cell other-month" onclick="openModal('${key}')"><div class="day-num"><div class="day-num-inner">${i}</div></div></div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderYear(y){
+  let html = '<div class="year-grid">';
+  for(let m=0; m<12; m++){
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m+1, 0).getDate();
+    const withCitas = daysWithCitas(y, m);
+    html += `<div class="mini-month" onclick="goMonth(${m})">`;
+    html += `<div class="mini-title">${MESES[m]}</div>`;
+    html += '<div class="mini-grid">';
+    for(let i=0; i<firstDay; i++) html += '<div class="mini-cell"></div>';
+    for(let d=1; d<=daysInMonth; d++){
+      const isToday = y===TODAY.getFullYear() && m===TODAY.getMonth() && d===TODAY.getDate();
+      html += `<div class="mini-cell${withCitas.has(d)?' has-cita':isToday?' today-mini':''}">${withCitas.has(d)?'':'&nbsp;'}</div>`;
+    }
+    html += '</div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+window.goMonth = function(m){
+  current = new Date(current.getFullYear(), m, 1);
+  setView('month');
+};
+
+window.setView = function(v){
+  viewMode = v;
+  document.getElementById('tab-month').classList.toggle('active', v==='month');
+  document.getElementById('tab-year').classList.toggle('active', v==='year');
+  render();
+};
+
+document.getElementById('prev-btn').onclick = () => {
+  if(viewMode==='month') current = new Date(current.getFullYear(), current.getMonth()-1, 1);
+  else current = new Date(current.getFullYear()-1, 0, 1);
+  render();
+};
+document.getElementById('next-btn').onclick = () => {
+  if(viewMode==='month') current = new Date(current.getFullYear(), current.getMonth()+1, 1);
+  else current = new Date(current.getFullYear()+1, 0, 1);
+  render();
+};
+document.getElementById('today-btn').onclick = () => {
+  current = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+  setView('month');
+};
+
+function render(){
+  const y = current.getFullYear(), m = current.getMonth();
+  document.getElementById('cal-title').textContent = viewMode==='month' ? `${MESES[m]} ${y}` : `${y}`;
+  document.getElementById('cal-body').innerHTML = viewMode==='month' ? renderMonth(y,m) : renderYear(y);
+  document.getElementById('legend').style.display = viewMode==='month' ? 'flex' : 'none';
+}
+render();
+</script>
 {% endblock %}

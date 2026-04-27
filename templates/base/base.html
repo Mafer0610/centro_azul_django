@@ -9,21 +9,37 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/azul.css' %}">
+  <style>
+    .az-user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; font-weight: 700; color: #fff; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: 0 0 10px rgba(74,158,255,0.35); user-select: none;
+    }
+    .az-logout-btn {
+      display: flex; align-items: center; gap: 9px;
+      width: 100%; padding: 10px 14px; border-radius: var(--radius-sm);
+      background: rgba(231,76,60,0.1); color: #ff8a80;
+      border: 1px solid rgba(231,76,60,0.25);
+      font-size: 0.88rem; font-weight: 600;
+      text-decoration: none; transition: all .2s ease; margin-top: 8px;
+    }
+    .az-logout-btn:hover { background: rgba(231,76,60,0.22); border-color: rgba(231,76,60,0.5); color: #ff5252; }
+    .az-nav-link svg { width:16px; height:16px; flex-shrink:0; opacity:.75; }
+    .az-nav-link:hover svg, .az-nav-link.active svg { opacity:1; }
+  </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-
 <div class="az-wrapper">
-  <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
   <aside class="az-sidebar">
-
     <div class="az-sidebar-logo">
-      {# Logo: coloca logo.png en static/img/ — se enlaza aquí automáticamente #}
-      <img src="{% static 'img/logo.png' %}" alt="Centro Azul logo"
+      <img src="{% static 'img/logo.png' %}" alt="Centro Azul"
            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
       <span style="display:none; width:46px; height:46px; background:linear-gradient(135deg,#4A9EFF,#00D4FF);
-                   border-radius:50%; align-items:center; justify-content:center;
-                   font-size:1.4rem;">🌊</span>
+                   border-radius:50%; align-items:center; justify-content:center; font-size:1rem; color:#fff; font-weight:700;">CA</span>
       <div class="az-brand">
         <span class="az-brand-name">Centro Azul</span>
         <span class="az-brand-sub">Acuática Inicial</span>
@@ -33,73 +49,73 @@
     <nav class="az-nav">
       <span class="az-nav-label">Principal</span>
       <a href="{% url 'menu' %}" class="az-nav-link {% if request.resolver_match.url_name == 'menu' %}active{% endif %}">
-        <span class="icon">🏠</span> Inicio
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Inicio
       </a>
 
       <span class="az-nav-label">Alumnos</span>
-      <a href="{% url 'lista_ninos' %}" class="az-nav-link {% if 'ninos' in request.path %}active{% endif %}">
-        <span class="icon">👶</span> Niños
+      <a href="{% url 'lista_ninos' %}" class="az-nav-link {% if 'ninos' in request.path and request.resolver_match.url_name != 'registro_nino' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Niños
       </a>
       <a href="{% url 'registro_nino' %}" class="az-nav-link {% if request.resolver_match.url_name == 'registro_nino' %}active{% endif %}">
-        <span class="icon">➕</span> Registrar Niño
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Registrar Niño
       </a>
 
       <span class="az-nav-label">Agenda</span>
-      <a href="{% url 'agenda' %}" class="az-nav-link {% if 'citas' in request.path and 'agendar' not in request.path %}active{% endif %}">
-        <span class="icon">📅</span> Ver Citas
+      <a href="{% url 'agenda' %}" class="az-nav-link {% if request.resolver_match.url_name == 'agenda' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Ver Citas
       </a>
       <a href="{% url 'agendar_cita' %}" class="az-nav-link {% if request.resolver_match.url_name == 'agendar_cita' %}active{% endif %}">
-        <span class="icon">🗓</span> Agendar Cita
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+        Agendar Cita
       </a>
 
       <span class="az-nav-label">Reportes</span>
       <a href="{% url 'reporte_citas' %}" class="az-nav-link">
-        <span class="icon">📄</span> Reporte Citas
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reporte Citas
       </a>
       <a href="{% url 'reporte_ninos' %}" class="az-nav-link">
-        <span class="icon">📋</span> Reporte Niños
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reporte Niños
       </a>
     </nav>
 
     <div class="az-sidebar-footer">
-      {% if user.is_authenticated %}
+      {% if request.session.usuario %}
       <div class="az-user-chip">
-        <div class="az-user-avatar">{{ user.usuario|first|upper }}</div>
+        <div class="az-user-avatar">{{ request.session.usuario|first|upper }}</div>
         <div>
-          <div class="az-user-name">{{ user.usuario }}</div>
+          <div class="az-user-name">{{ request.session.usuario }}</div>
           <div class="az-user-role">Administrador</div>
         </div>
       </div>
-      <a href="{% url 'logout' %}" class="az-btn az-btn-secondary" style="width:100%; justify-content:center;">
-        🚪 Cerrar Sesión
+      <a href="{% url 'logout' %}" class="az-logout-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Cerrar Sesión
       </a>
       {% endif %}
     </div>
-
   </aside>
 
-  <!-- ── Main ──────────────────────────────────────────────────────────── -->
   <main class="az-main">
     <div class="az-topbar">
       <h1 class="az-page-title">{% block page_title %}{% endblock %}</h1>
-      <div style="font-size:0.8rem; color:var(--text-muted);">
-        {% now "d M Y" %}
-      </div>
+      <div style="font-size:0.8rem; color:var(--text-muted);">{% now "d M Y" %}</div>
     </div>
-
     <div class="az-content">
-      {# ── Mensajes del sistema ────────────────────────────────────────── #}
       {% for msg in messages %}
-        <div class="az-alert {% if msg.tags == 'error' %}az-alert-error{% elif msg.tags == 'success' %}az-alert-success{% else %}az-alert-info{% endif %}">
-          {{ msg }}
-        </div>
+        <div class="az-alert {% if msg.tags == 'error' %}az-alert-error{% elif msg.tags == 'success' %}az-alert-success{% else %}az-alert-info{% endif %}">{{ msg }}</div>
       {% endfor %}
-
       {% block content %}{% endblock %}
     </div>
   </main>
 </div>
-
 {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -5,40 +5,49 @@ from django import forms
 from apps.ninos.models import Nino
 
 
+# Tipos que coinciden exactamente con Cita.TIPO_CHOICES del modelo
 TIPO_CHOICES = [
     ('', '— Selecciona —'),
-    ('evaluacion',  'Evaluación'),
-    ('terapia',     'Terapia'),
-    ('seguimiento', 'Seguimiento'),
-    ('otro',        'Otro'),
+    ('CEMS',        'CEMS'),
+    ('AI',          'AI'),
+    ('OCUPACIONAL', 'Ocupacional'),
+    ('BABY SPA',    'Baby Spa'),
+    ('MUESTRA',     'Muestra'),
+    ('REPOSICION',  'Reposición'),
 ]
 
 ESTADO_CHOICES = [
-    ('programada',  'Programada'),
+    ('pendiente',   'Pendiente'),
+    ('confirmada',  'Confirmada'),
     ('completada',  'Completada'),
     ('cancelada',   'Cancelada'),
-    ('no_asistio',  'No asistió'),
 ]
 
 
 class AgendarCitaForm(forms.Form):
-    nino        = forms.ModelChoiceField(
+    nino = forms.ModelChoiceField(
         queryset=Nino.objects.filter(activo=1).order_by('nombre_completo'),
         label='Niño *',
         empty_label='— Selecciona un niño —',
     )
-    fecha       = forms.DateField(
+    fecha = forms.DateField(
         label='Fecha *',
         widget=forms.DateInput(attrs={'type': 'date'}),
     )
-    hora        = forms.TimeField(
+    hora = forms.TimeField(
         label='Hora *',
         widget=forms.TimeInput(attrs={'type': 'time'}),
     )
-    tipo_sesion = forms.ChoiceField(label='Tipo de sesión *', choices=TIPO_CHOICES)
-    terapeuta   = forms.CharField(label='Terapeuta *', max_length=150)
+    tipo_sesion = forms.ChoiceField(
+        label='Tipo de sesión *',
+        choices=TIPO_CHOICES,
+    )
+    terapeuta = forms.CharField(
+        label='Responsable *',
+        max_length=150,
+    )
     observaciones = forms.CharField(
-        label='Observaciones',
+        label='Notas',
         required=False,
         widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Notas adicionales...'}),
     )
@@ -51,9 +60,9 @@ class AgendarCitaForm(forms.Form):
 
 
 class EditarEstadoCitaForm(forms.Form):
-    estado        = forms.ChoiceField(label='Estado', choices=ESTADO_CHOICES)
+    estado = forms.ChoiceField(label='Estado', choices=ESTADO_CHOICES)
     observaciones = forms.CharField(
-        label='Observaciones',
+        label='Notas',
         required=False,
         widget=forms.Textarea(attrs={'rows': 3}),
     )
